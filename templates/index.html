@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Search Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        }
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 1.5s infinite',
+                    }
+                }
+            },
+            plugins: [],
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        /* Animation for typing dots */
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        
+        .typing-dot:nth-child(1) { animation: blink 1.4s infinite 0.2s; }
+        .typing-dot:nth-child(2) { animation: blink 1.4s infinite 0.4s; }
+        .typing-dot:nth-child(3) { animation: blink 1.4s infinite 0.6s; }
+
+        /* Glass effect navbar */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Gradient animation for text */
+        @keyframes gradient {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #4338ca, #6366f1, #818cf8, #6366f1, #4338ca);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 6s ease infinite;
+        }
+
+        /* Fix height issues */
+        html, body {
+            height: 100%;
+        }
+        
+        /* Chat container scrolling fix */
+        #chat-messages {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Fix mobile keyboard issues */
+        @media (max-width: 640px) {
+            .mobile-adjust {
+                height: -webkit-fill-available;
+            }
+        }
+        
+        /* Custom vh variable for mobile */
+        :root {
+            --vh: 1vh;
+        }
+
+        .h-screen-custom {
+            height: calc(var(--vh, 1vh) * 100);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar - Glass effect -->
+    <nav class="glass-nav fixed w-full border-b border-gray-200 shadow-sm z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-14 sm:h-16 items-center">
+                <div class="flex items-center">
+                    <div class="bg-primary-600 text-white p-1.5 sm:p-2 rounded-full shadow-lg flex items-center justify-center">
+                        <i class="fas fa-search text-sm sm:text-lg"></i>
+                    </div>
+                    <div class="ml-2 sm:ml-3">
+                        <span class="text-lg sm:text-2xl font-extrabold gradient-text">Research Chatbot</span>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Powered by Qwen LLM</span>
+                    <div class="flex items-center bg-primary-50 px-3 py-1 rounded-full text-primary-700 text-xs font-medium">
+                        <i class="fas fa-database mr-1 text-primary-500"></i>
+                        ArXiv & Wikipedia
+                    </div>
+                </div>
+                <!-- Mobile info button -->
+                <div class="sm:hidden">
+                    <button id="mobile-info" class="bg-primary-50 rounded-full p-2 text-primary-700">
+                        <i class="fas fa-info text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile info panel (hidden by default) -->
+    <div id="mobile-info-panel" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-5 m-4 max-w-sm w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">About this App</h3>
+                <button id="close-info" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-primary-600 mr-2"></i>
+                    <span class="text-sm">Powered by Qwen LLM</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-database text-primary-600 mr-2"></i>
+                    <span class="text-sm">Knowledge from ArXiv & Wikipedia</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-col h-screen-custom pt-14 sm:pt-16">
+        <!-- Chat Container - Full Height -->
+        <div class="flex-grow flex flex-col w-full max-w-5xl mx-auto px-2 sm:px-4">
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-grow p-3 sm:p-4 pb-0 custom-scrollbar">
+                {% for message in messages %}
+                    <div class="mb-4 flex {% if message.role == 'user' %}justify-end{% endif %}">
+                        <div class="{% if message.role == 'assistant' %}bg-white text-gray-800 border border-gray-200{% else %}bg-primary-600 text-white{% endif %} rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 max-w-[85%] sm:max-w-[80%] shadow-sm">
+                            <div class="text-sm">{{ message.content }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <!-- Loading indicator (hidden by default) -->
+                <div id="loading-indicator" class="mb-4 flex hidden">
+                    <div class="bg-white text-gray-800 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 shadow-sm border border-gray-200">
+                        <div class="flex items-center">
+                            <span class="mr-2">Searching</span>
+                            <span class="typing-dot text-xl">.</span>
+                            <span class="typing-dot text-xl">.</span>
+                            <span class="typing-dot text-xl">.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area - Sticky at bottom -->
+            <div class="border-t border-gray-200 p-3 sm:p-4 bg-white rounded-t-xl shadow-lg">
+                <form id="chat-form" class="flex gap-2 items-center">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        placeholder="Ask me anything..." 
+                        class="flex-1 rounded-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm text-sm sm:text-base"
+                        autofocus
+                    >
+                    <button 
+                        type="submit" 
+                        class="bg-primary-600 text-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center hover:bg-primary-700 transition-colors shadow-md"
+                    >
+                        <i class="fas fa-paper-plane text-sm sm:text-base"></i>
+                    </button>
+                </form>
+                
+                <div class="flex justify-between mt-2 sm:mt-3 px-1">
+                    <button id="clear-chat" class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                        <i class="fas fa-trash-alt mr-1"></i> Clear chat
+                    </button>
+                    <span class="text-xs text-gray-400">© 2025 AI Search Assistant</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Set custom viewport height variable for mobile browsers
+            function setVHVariable() {
+                let vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            }
+            
+            // Call it initially and on resize
+            setVHVariable();
+            window.addEventListener('resize', setVHVariable);
+            
+            // Scroll to bottom of chat messages
+            function scrollToBottom() {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Show loading indicator
+            function showLoading() {
+                $('#loading-indicator').removeClass('hidden');
+                scrollToBottom();
+            }
+            
+            // Hide loading indicator
+            function hideLoading() {
+                $('#loading-indicator').addClass('hidden');
+            }
+            
+            // Add a message to the chat
+            function addMessage(content, isUser) {
+                const justifyClass = isUser ? 'justify-end' : '';
+                const bubbleClass = isUser 
+                    ? 'bg-primary-600 text-white' 
+                    : 'bg-white text-gray-800 border border-gray-200';
+                
+                const html = `
+                    <div class="mb-4 flex ${justifyClass}">
+                        <div class="${bubbleClass} rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 max-w-[85%] sm:max-w-[80%] shadow-sm">
+                            <div class="text-sm">${content}</div>
+                        </div>
+                    </div>
+                `;
+                $('#chat-messages').append(html);
+                scrollToBottom();
+            }
+            
+            // Submit the form
+            $('#chat-form').submit(function(e) {
+                e.preventDefault();
+                
+                const userInput = $('#user-input').val().trim();
+                if (!userInput) return;
+                
+                // Add user message
+                addMessage(userInput, true);
+                
+                // Clear input
+                $('#user-input').val('');
+                
+                // Show loading
+                showLoading();
+                
+                // Submit to backend
+                $.ajax({
+                    url: '/ask',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ prompt: userInput }),
+                    success: function(data) {
+                        hideLoading();
+                        // Make sure we're accessing the response property of the returned data
+                        const responseText = data.response || "I'm sorry, I couldn't process your request.";
+                        addMessage(responseText, false);
+                    },
+                    error: function(xhr) {
+                        hideLoading();
+                        const errorMsg = xhr.responseJSON && xhr.responseJSON.error 
+                            ? xhr.responseJSON.error 
+                            : 'An error occurred while processing your request.';
+                        addMessage(`Error: ${errorMsg}`, false);
+                    }
+                });
+            });
+            
+            // Clear chat
+            $('#clear-chat').click(function() {
+                $.post('/clear', function() {
+                    $('#chat-messages').html(`
+                        <div class="mb-4 flex">
+                            <div class="bg-white text-gray-800 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 max-w-[85%] sm:max-w-[80%] shadow-sm border border-gray-200">
+                                <div class="text-sm">Hi, I can search the web. How can I help you?</div>
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+            
+            // Mobile info panel toggle
+            $('#mobile-info').click(function() {
+                $('#mobile-info-panel').removeClass('hidden');
+            });
+            
+            $('#close-info').click(function() {
+                $('#mobile-info-panel').addClass('hidden');
+            });
+            
+            // Enable scrolling functionality
+            setTimeout(scrollToBottom, 100);
+            
+            // Force scroll check on window resize or orientation change
+            window.addEventListener('resize', scrollToBottom);
+            window.addEventListener('orientationchange', scrollToBottom);
+        });
+    </script>
+</body>
+</html>
