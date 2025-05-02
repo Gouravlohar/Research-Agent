@@ -1,7 +1,7 @@
 # Capsitech Capstone Project: AI Search Assistant
 
 ## Project Overview
-This AI Search Assistant is a web-based application that leverages Llama 3.3's language processing capabilities to provide intelligent search results from academic and encyclopedia sources. The application combines a modern, responsive UI with powerful backend search functionality to create an intuitive chat-based search experience.
+This AI Search Assistant is a web-based application that leverages Qwen-QWQ-32B language processing capabilities to provide intelligent search results from academic and encyclopedia sources. The application combines a modern, responsive UI with powerful backend search functionality to create an intuitive chat-based search experience.
 
 ![Demo](image.png)
 
