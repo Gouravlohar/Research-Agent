@@ -50,7 +50,7 @@ def ask():
     
     try:
         # Initialize LLM and tools
-        llm=ChatGroq(groq_api_key=api_key, model_name="qwen-qwq-32b", streaming=False)
+        llm=ChatGroq(groq_api_key=api_key, model_name="qwen/qwen3-32b", streaming=False)
         tools=[arxiv, wiki]
         
         # Initialize agent
