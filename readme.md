@@ -1,7 +1,7 @@
-# Capsitech Capstone Project: AI Search Assistant
+# AI Search Assistant
 
 ## Project Overview
-This AI Search Assistant is a web-based application that leverages Qwen-QWQ-32B language processing capabilities to provide intelligent search results from academic and encyclopedia sources. The application combines a modern, responsive UI with powerful backend search functionality to create an intuitive chat-based search experience.
+This AI Search Assistant is a web-based application that leverages Qwen-32B language processing capabilities to provide intelligent search results from academic and encyclopedia sources. The application combines a modern, responsive UI with powerful backend search functionality to create an intuitive chat-based search experience.
 
 ![Demo](image.png)
 
@@ -9,7 +9,7 @@ This AI Search Assistant is a web-based application that leverages Qwen-QWQ-32B 
 
 ### Search Capabilities
 - **Multi-source Search**: Integrates with both ArXiv and Wikipedia APIs to provide comprehensive search results
-- **Intelligent Query Processing**: Uses Groq's Qwen-QWQ-32B model to understand and process natural language queries
+- **Intelligent Query Processing**: Uses Groq's Qwen-32B model to understand and process natural language queries
 
 
 ### User Interface
